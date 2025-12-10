@@ -35,13 +35,38 @@ def toto(machine: Machine):
             target[i] -= 1
         return tuple(target)
 
-    @cache
-    def tutu(target: tuple[int]):
-        if any(v < 0 for v in target): return float('inf')
-        if all(v == 0 for v in target): return 0
-        return 1 + min(tutu(next_(target, v)) for v in buttons)
+    def find_max(target, button):
+        assert all(v >= 0 for v in target), 'invalid state'
+        c = 0
+        while not any(v < 0 for v in target):
+            target = next_(target, button)
+            c += 1
+        return c - 1
 
-    return tutu(target)
+    def backtrack(idx, target):
+        if idx >= len(buttons): 
+            if all(v == 0 for v in target):
+                return []
+            else:
+                return None
+        max_ = find_max(target, buttons[idx])
+        for i in reversed(range(max_+1)):
+            n_target = target
+            for _ in range(i):
+                n_target = next_(n_target, buttons[idx])
+            res = backtrack(idx+1, n_target)
+            if res is not None: return [i] + res
+        return None
+
+    return backtrack(0, target)
 
 
-print(sum(map(toto, machines)))
+toto(machines[4])
+
+# res = 0
+# for m in machines:
+#     r = toto(m)
+#     print(sum(r), r)
+#     res += sum(r)
+# 
+# print(res)
